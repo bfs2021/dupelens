@@ -5,6 +5,7 @@ import java.util.Comparator;
 /** Dependency-free integration checks; run with scripts/test.ps1 or scripts/test.sh. */
 public final class SmokeTest {
     private static void check(boolean value, String message) { if (!value) throw new AssertionError(message); }
+    private static String sizeLabel(long bytes) { return Main.readable(bytes); }
     public static void main(String[] args) throws Exception {
         Path root = Files.createTempDirectory("dupelens-test");
         try {
@@ -28,7 +29,11 @@ public final class SmokeTest {
             check(report.contains("<details open>"), "expandable group");
             check(report.contains("hero&amp;.png"), "escaped filename and path");
             check(report.contains("12,480"), "formatted scan count");
-            check(report.contains("1.8 MB"), "readable redundant size");
+            check(report.contains("1.8 MiB"), "readable redundant size");
+            check(sizeLabel(1023).equals("1023 B"), "bytes below one KiB keep the byte unit");
+            check(sizeLabel(1024).equals("1.0 KiB"), "one KiB boundary");
+            check(sizeLabel(1024 * 1024).equals("1.0 MiB"), "one MiB boundary");
+            check(sizeLabel(1024 * 1024 - 1).equals("1024.0 KiB"), "just below one MiB stays KiB");
             check(report.contains("2 files"), "group file count");
             check(!report.contains("<script") && !report.contains("src=\"http"), "offline report");
             try { Main.scan(root.resolve("missing")); throw new AssertionError("missing directory accepted"); }
