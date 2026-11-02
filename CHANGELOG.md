@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1 — 2026-11-02
+
+- Add **Select all extra copies** across every duplicate group, including groups hidden by search, while preserving each group's chosen keeper.
+- Support selections larger than 500 files with sequential requests after one explicit confirmation. Each request retains the existing server-side validation and keeper protection.
+- Disable bulk selection when Trash is unavailable, all eligible copies are selected, or an operation is in progress.
+
 ## 1.2.0 — 2026-11-02
 
 - Replace the decorative report mockup with a compact review workspace, readable file rows, and responsive layouts.

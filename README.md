@@ -51,8 +51,8 @@ Requires a **JDK 17 or newer**. Maven is optional.
 
 Download either runnable JAR and its SHA-256 checksum from [GitHub Releases](https://github.com/illusionoftalha/dupelens/releases):
 
-- `dupelens-1.2.0.jar`: read-only scans and saved HTML reports.
-- `dupelens-review-1.2.0.jar`: local browser review with optional, confirmed moves to Trash.
+- `dupelens-1.2.1.jar`: read-only scans and saved HTML reports.
+- `dupelens-review-1.2.1.jar`: local browser review with optional, confirmed moves to Trash.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
@@ -86,7 +86,7 @@ The report refuses to overwrite existing files. Reports contain full local paths
 On Windows, from the folder containing the review JAR:
 
 ```powershell
-java -jar .\dupelens-review-1.2.0.jar "C:\Users\YourName\Downloads"
+java -jar .\dupelens-review-1.2.1.jar "C:\Users\YourName\Downloads"
 ```
 
 Or build locally and run `java -jar target/dupelens-review.jar ./your-folder`.
@@ -94,8 +94,8 @@ Or build locally and run `java -jar target/dupelens-review.jar ./your-folder`.
 After scanning, DupeLens opens a private local URL in your browser (or prints the URL if automatic opening is unavailable). Keep the terminal running; press Ctrl+C to end the session. Review uses JavaScript and connects only to the Java process on `127.0.0.1`. There are no remote services or telemetry.
 
 1. Expand a group and compare full paths. Use **Keep** to protect your preferred copy.
-2. Check unwanted copies, or click **Select other copies** in that group. Nothing is selected initially.
-3. Click **Delete selected**, review the exact files and matching retained copies, then confirm **Move to Trash**. Cancel leaves files untouched. Each operation supports up to 500 files.
+2. Check unwanted copies, or click **Select other copies** in that group. Use **Select all extra copies** to select unwanted copies across every group, including those hidden by search. Each group's chosen keeper stays protected. Nothing is selected initially.
+3. Click **Delete selected**, review the exact files and matching retained copies, then confirm **Move to Trash**. Cancel leaves files untouched. Large selections are processed sequentially in requests of up to 500 files after this confirmation. If a request fails, processing stops; reload and check the action log before retrying.
 4. Check the result and download the session CSV action log if needed. Logs are held in memory until the app closes.
 
 A saved `file://` HTML report cannot delete arbitrary local paths: browsers intentionally block that access. Start the review JAR to enable deletion; the CLI's `--html` output stays read-only.
@@ -111,7 +111,7 @@ Filesystem changes and Trash operations are not atomic. Close applications modif
 If a Windows JDK reports `Unable to establish loopback connection`, try a writable socket directory (the current folder must be writable):
 
 ```powershell
-java "-Djdk.net.unixdomain.tmpdir=$PWD" -jar .\dupelens-review-1.2.0.jar "C:\Users\YourName\Downloads"
+java "-Djdk.net.unixdomain.tmpdir=$PWD" -jar .\dupelens-review-1.2.1.jar "C:\Users\YourName\Downloads"
 ```
 
 ## How it works

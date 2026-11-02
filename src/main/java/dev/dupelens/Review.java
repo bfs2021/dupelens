@@ -263,8 +263,9 @@ public final class Review implements AutoCloseable {
             g.querySelector('.select-group').disabled=busy||!CAN_TRASH||resolved;
           });
           const rows=selected(), bytes=rows.reduce((n,r)=>n+Number(r.dataset.size),0);
-          $('#selection-count').textContent=rows.length?rows.length+' files selected · '+size(bytes)+(rows.length>500?' · limit 500 per operation':''):'No files selected';
-          $('#delete').disabled=busy||!CAN_TRASH||!rows.length||rows.length>500;
+          $('#selection-count').textContent=rows.length?rows.length+' files selected · '+size(bytes):'No files selected';
+          $('#delete').disabled=busy||!CAN_TRASH||!rows.length;
+          $('#select-all').disabled=busy||!CAN_TRASH||!$$('.pick:not(:disabled):not(:checked)').length;
           $('#clear').disabled=busy||!rows.length;
           $('#confirm-delete').disabled=busy;$('#cancel-delete').disabled=busy;
         }
@@ -275,10 +276,11 @@ public final class Review implements AutoCloseable {
           g.querySelector('.select-group').addEventListener('click',()=>{g.querySelectorAll('.pick:not(:disabled)').forEach(p=>p.checked=true);update();});
         });
         $('#clear').addEventListener('click',()=>{$$('.pick').forEach(p=>p.checked=false);update();});
+        $('#select-all').addEventListener('click',()=>{$$('.pick:not(:disabled)').forEach(p=>p.checked=true);update();});
         $('#search').addEventListener('input',e=>{const term=e.target.value.trim().toLowerCase();let count=0;groups.forEach(g=>{g.hidden=!g.textContent.toLowerCase().includes(term);if(!g.hidden)count++;});$('#no-matches').hidden=count!==0;});
         function list(target,values){target.replaceChildren();values.forEach(value=>{const li=document.createElement('li');li.textContent=value;target.append(li);});}
         $('#delete').addEventListener('click',()=>{
-          pending=selected();if(!pending.length||pending.length>500)return;
+          pending=selected();if(!pending.length)return;
           const affected=[...new Set(pending.map(r=>r.closest('.group')))];
           const keepers=affected.map(g=>Array.from(g.querySelectorAll('.file-row')).find(r=>!pending.includes(r)&&!r.dataset.blocked)).filter(Boolean);
           if(keepers.length!==affected.length){message.textContent='Keep one available copy in each group.';return;}
@@ -291,11 +293,15 @@ public final class Review implements AutoCloseable {
         dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});
         $('#confirm-delete').addEventListener('click',async()=>{
           if(busy||!pending.length)return;busy=true;update();$('#confirm-delete').textContent='Verifying files…';
+          const results=[];
           try{
-            const res=await fetch('trash',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8','X-DupeLens-Token':SESSION_TOKEN},body:pending.map(r=>r.dataset.file).join(',')});
-            const text=await res.text();if(!res.ok)throw new Error(text);
-            sessionStorage.setItem('dupelens-result-'+SESSION_TOKEN,text);location.reload();
-          }catch(e){dialog.close();message.classList.add('error');message.textContent='No further action taken. '+e.message+' Reload this page to check the action log before retrying.';}
+            for(let start=0;start<pending.length;start+=500){
+              $('#confirm-delete').textContent='Verifying '+(start+1)+'–'+Math.min(start+500,pending.length)+' of '+pending.length+'…';
+              const res=await fetch('trash',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8','X-DupeLens-Token':SESSION_TOKEN},body:pending.slice(start,start+500).map(r=>r.dataset.file).join(',')});
+              const text=await res.text();if(!res.ok)throw new Error(text);results.push(text);
+            }
+            sessionStorage.setItem('dupelens-result-'+SESSION_TOKEN,results.join('\\n'));location.reload();
+          }catch(e){dialog.close();message.classList.add('error');message.textContent=results.join('\\n')+'\\nStopped. '+e.message+' Reload this page and check the action log before retrying.';}
           finally{busy=false;$('#confirm-delete').textContent='Move to Trash';update();}
         });
         const last=sessionStorage.getItem('dupelens-result-'+SESSION_TOKEN);if(last){message.textContent=last;sessionStorage.removeItem('dupelens-result-'+SESSION_TOKEN);}
