@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Use IEC size labels consistently in reports and browser selections; add formatter boundary tests (PR #6 and follow-up).
+- Add community conduct, private security reporting, support, architecture, and maintainer documentation.
+- Improve contributor onboarding, issue forms, PR templates, ownership, and editor settings.
+- Pin workflow actions, check packaged class boundaries and documentation links, exercise native OS test scripts, and schedule build-tool update proposals.
+- Extract release notes from the matching version heading so Unreleased notes cannot leak into older releases.
+
 ## 1.2.1 — 2026-11-02
 
 - Add **Select all extra copies** across every duplicate group, including groups hidden by search, while preserving each group's chosen keeper.

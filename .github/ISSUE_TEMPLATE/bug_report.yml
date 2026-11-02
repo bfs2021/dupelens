@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a reproducible problem with DupeLens.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Search existing issues first. Redact private paths, file contents, and session URLs. Report vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: DupeLens version or source commit
+      placeholder: e.g. v1.2.1 or a commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Affected component
+      options:
+        - CLI scan
+        - Saved HTML report
+        - Browser review
+        - Build or tests
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, java -version output, and browser/version when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include a command and minimal fixture using disposable files and synthetic paths.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and relevant output
+      description: Include error text or a redacted screenshot where helpful.
+    validations:
+      required: true

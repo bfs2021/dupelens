@@ -5,3 +5,11 @@
 .vscode/
 *.iml
 report.html
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.log
+/dupelens-actions.csv
+/dupelens-*.jar
+/SHA256SUMS.txt

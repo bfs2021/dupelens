@@ -1,154 +1,126 @@
-<div align="center">
-
 # DupeLens
 
-### Find the copies. Keep control.
+Find duplicate files with a read-only Java CLI, or review copies in a local browser workspace. No runtime dependencies, remote services, or telemetry.
 
-**Find duplicate files with a read-only CLI, or review copies in a local browser workspace. Zero runtime dependencies.**
+[![Java checks](https://github.com/illusionoftalha/dupelens/actions/workflows/ci.yml/badge.svg)](https://github.com/illusionoftalha/dupelens/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/illusionoftalha/dupelens)](https://github.com/illusionoftalha/dupelens/releases/latest)
+![Java 17+](https://img.shields.io/badge/Java-17%2B-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-![Java 17+](https://img.shields.io/badge/Java-17%2B-orange)
-![Dependencies](https://img.shields.io/badge/runtime_dependencies-zero-6ee7b7)
-![License MIT](https://img.shields.io/badge/license-MIT-blue)
+[Download](https://github.com/illusionoftalha/dupelens/releases/latest) · [Contribute](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
 
-</div>
+## Choose your workflow
 
-```text
-$ java -jar dupelens.jar ./downloads --html report.html
+| App | What it does | File operations |
+| --- | --- | --- |
+| CLI | Scan a folder, print matches, export a portable HTML report. | Read-only; report creation never overwrites an existing file. |
+| Browser review | Search groups, choose keepers, select extra copies, review a confirmation, and move copies to system Trash. | Only after explicit confirmation; no permanent-delete fallback. |
 
-Scanned 5 files | 1 duplicate groups | 4 redundant bytes
+Both require **Java 17 or newer**. Building from source also requires a JDK and Maven.
 
-4 bytes each (2 copies)
-  /downloads/copy.txt
-  /downloads/original.txt
+## Download and run
 
-Report: /reports/report.html
-```
+Download a JAR from [GitHub Releases](https://github.com/illusionoftalha/dupelens/releases/latest). The current stable assets are:
 
-## Preview
+- **`dupelens-1.2.1.jar`** — read-only CLI and saved reports.
+- **`dupelens-review-1.2.1.jar`** — browser review and confirmed Trash actions.
+- **`SHA256SUMS.txt`** — SHA-256 checksums for both JARs.
 
-<p align="center">
-  <img src="dupelens-screenshot.png"
-       alt="DupeLens HTML Report"
-       width="600">
-</p>
+The source-code ZIP is not a runnable application. Run from the folder containing the JAR and quote paths with spaces.
 
-## Why DupeLens?
-
-Backups, downloads, and exported folders accumulate copies. DupeLens shows matching contents, sorted by redundant bytes. The CLI and saved reports are read-only. A separate browser-review app can move selected copies to Recycle Bin/Trash after confirmation.
-
-- **Read-only CLI:** no delete command, no automatic cleanup. Deletion exists only in the separate review app.
-- **Size-first filtering:** only files with a matching size are hashed.
-- **SHA-256 fingerprints:** matching names alone never count as duplicates.
-- **Bounded hashing memory:** streams files in 64 KiB chunks.
-- **Portable reports:** one HTML file, no server, scripts, fonts, or network calls.
-- **Hard-link awareness:** excludes repeated file identities when the filesystem provides them.
-- **Practical failure handling:** unreadable files become warnings, and symbolic links are skipped.
-- **Explicit review actions:** choose keepers, review selected paths, then confirm a move to Trash. Nothing is automatically selected for deletion.
-
-## Quick start
-
-Requires a **JDK 17 or newer**. Maven is optional.
-
-Download either runnable JAR and its SHA-256 checksum from [GitHub Releases](https://github.com/illusionoftalha/dupelens/releases):
-
-- `dupelens-1.2.1.jar`: read-only scans and saved HTML reports.
-- `dupelens-review-1.2.1.jar`: local browser review with optional, confirmed moves to Trash.
-
-See [CHANGELOG.md](CHANGELOG.md) for release notes.
+### Read-only scan and report
 
 ```sh
-# Run directly from source; no build tools required
-java src/main/java/dev/dupelens/Main.java ./your-folder
-
-# Generate a report (choose a path that does not already exist)
-java src/main/java/dev/dupelens/Main.java ./your-folder --html report.html
+java -jar dupelens-1.2.1.jar "/path/to/folder" --html report.html
 ```
 
-Or build a runnable JAR:
+Open `report.html` in a browser. The self-contained report has no JavaScript, server, remote assets, or delete controls. Choose a new filename if the report already exists.
 
-```sh
-mvn package
-java -jar target/dupelens.jar ./your-folder --html report.html
-```
+### Browser review and deletion
 
-Quote paths containing spaces. On Windows, for example:
-
-```powershell
-java -jar target/dupelens.jar "C:\Users\YourName\Downloads" --html "duplicates.html"
-```
-
-Reports include a scan summary and expandable duplicate groups with full paths. Saved reports work offline with no JavaScript or external assets. Use the sidebar to navigate and expand a group with a click or the keyboard.
-
-The report refuses to overwrite existing files. Reports contain full local paths; review them before sharing.
-
-## Browser review and deletion
-
-On Windows, from the folder containing the review JAR:
+From PowerShell on Windows:
 
 ```powershell
 java -jar .\dupelens-review-1.2.1.jar "C:\Users\YourName\Downloads"
 ```
 
-Or build locally and run `java -jar target/dupelens-review.jar ./your-folder`.
+On Linux or macOS:
 
-After scanning, DupeLens opens a private local URL in your browser (or prints the URL if automatic opening is unavailable). Keep the terminal running; press Ctrl+C to end the session. Review uses JavaScript and connects only to the Java process on `127.0.0.1`. There are no remote services or telemetry.
+```sh
+java -jar dupelens-review-1.2.1.jar "/path/to/folder"
+```
+
+After scanning, the app opens a private local URL or prints it for you to open. **Keep the terminal running** while using the browser; Ctrl+C ends the session. Browser review uses JavaScript and connects only to the Java process on `127.0.0.1`.
 
 1. Expand a group and compare full paths. Use **Keep** to protect your preferred copy.
-2. Check unwanted copies, or click **Select other copies** in that group. Use **Select all extra copies** to select unwanted copies across every group, including those hidden by search. Each group's chosen keeper stays protected. Nothing is selected initially.
-3. Click **Delete selected**, review the exact files and matching retained copies, then confirm **Move to Trash**. Cancel leaves files untouched. Large selections are processed sequentially in requests of up to 500 files after this confirmation. If a request fails, processing stops; reload and check the action log before retrying.
-4. Check the result and download the session CSV action log if needed. Logs are held in memory until the app closes.
+2. Check unwanted copies, choose **Select other copies** within a group, or choose **Select all extra copies** across every group, including groups hidden by search. Nothing is selected initially.
+3. Click **Delete selected**, review selected paths and retained copies, then confirm **Move to Trash**. Cancel leaves files untouched.
+4. Review the result and download the CSV action log before ending the session. The log is held in memory.
 
-A saved `file://` HTML report cannot delete arbitrary local paths: browsers intentionally block that access. Start the review JAR to enable deletion; the CLI's `--html` output stays read-only.
+Large selections use sequential requests of up to 500 IDs after one confirmation. Request errors stop further requests; reload and inspect the action log before retrying. A saved `file://` report cannot delete arbitrary local paths; launch the review JAR for that workflow.
 
-### How moving files stays safe
-
-The backend accepts only file IDs from the current scan, refuses selections that leave no available keeper, and processes operations serially. Immediately before each move it checks both copies' size, modification time, file identity, and resolved path, compares their contents byte-for-byte without following final-component symlinks, and checks metadata again. Changed, unavailable, or mismatched files are skipped and reported. There is no permanent-delete fallback.
-
-Trash support depends on the OS/JDK and desktop session. If Java reports it unsupported, deletion is disabled with a reason. The review process binds only to loopback and validates the host, origin, and a per-session request token. Keep its private URL to yourself.
-
-Filesystem changes and Trash operations are not atomic. Close applications modifying scanned files and rescan after external changes; a file could still change in the short interval between verification and the native Trash operation. Trash behavior and restoration depend on your system. No image-similarity matching is performed.
-
-If a Windows JDK reports `Unable to establish loopback connection`, try a writable socket directory (the current folder must be writable):
+If a Windows JDK reports `Unable to establish loopback connection`, try a writable socket directory. The current directory must exist and be writable:
 
 ```powershell
 java "-Djdk.net.unixdomain.tmpdir=$PWD" -jar .\dupelens-review-1.2.1.jar "C:\Users\YourName\Downloads"
 ```
 
-## How it works
+### Verify a download
 
-```mermaid
-flowchart LR
-    A[Walk regular files] --> B[Group by byte size]
-    B --> C[Hash candidates with SHA-256]
-    C --> D[Group matching fingerprints]
-    D --> E[Sort by redundant bytes]
-    E --> F[Terminal + optional HTML]
+Compare the JAR's SHA-256 hash with the corresponding line in the release's `SHA256SUMS.txt`. In PowerShell:
+
+```powershell
+Get-FileHash .\dupelens-review-1.2.1.jar -Algorithm SHA256
 ```
 
-A group with three 10 MB files has 20 MB of redundant contents. This is an estimate, not a promise of physically reclaimable disk space: compression, deduplication, snapshots, and filesystem allocation can change actual usage. Empty files are included with zero redundant bytes.
+## Preview
 
-The scanner checks size, modification time, and file identity around hashing to catch ordinary concurrent edits. It is not an atomic filesystem snapshot; scan a stable folder for reliable results. Matching hashes are not followed by a byte-by-byte comparison. Directory metadata scales with file count, and scanning large matching files can take time. Hard-link detection depends on filesystem file-key support.
+![DupeLens saved HTML report](dupelens-screenshot.png)
 
-## Tests
+The saved report shows the scan summary and full paths. Browser review adds search, keeper selection, and confirmed Trash actions.
 
-The integration checks use temporary directories and require no test libraries:
+## How it works
+
+Files are grouped by size, then candidates are hashed with SHA-256 in 64 KiB chunks. Matching fingerprints form groups sorted by redundant logical bytes. Symbolic links are skipped, ordinary read failures become warnings, and hard-link aliases are excluded where file identity is available.
+
+In browser review, the backend accepts only IDs from the current session, checks that a copy remains, validates file/keeper metadata and resolved paths, compares bytes, then rechecks metadata immediately before each native Trash call. Changed or mismatched files are skipped and reported. Trash support varies by OS/JDK/desktop session; when unsupported, deletion is disabled.
+
+### Limits and privacy
+
+- Scans are snapshots, not live filesystem views. Hash matches in the CLI are not byte-verified; review verifies bytes before moving files.
+- Verification and native Trash are separate operations. External writers can still race the final move; close programs changing the files and rescan after changes.
+- Space estimates measure redundant logical bytes. Compression, deduplication, snapshots, filesystem allocation, and Trash retention affect actual free space.
+- File metadata grows with file count, although stream buffers are bounded. Empty files may form zero-space groups.
+- Reports and logs contain full local paths. Review before sharing; keep live review URLs private.
+- Image similarity, exclusion patterns, scan cancellation, and persistent logs are not implemented.
+
+Read the [architecture](docs/architecture.md) for implementation details and [security policy](SECURITY.md) for reporting and boundaries.
+
+## Build and test
 
 ```sh
 sh scripts/test.sh
+mvn --batch-mode package
+python scripts/check_repository.py
+python scripts/check_artifacts.py
 ```
 
-```powershell
-./scripts/test.ps1
+On Windows use `./scripts/test.ps1`. Python 3.10+ is used only for repository and packaging checks. Test scripts execute the actual integration/safety assertions; Maven currently compiles those main-method tests without running them. [Issue #2](https://github.com/illusionoftalha/dupelens/issues/2) tracks Maven test execution.
+
+Maven creates `target/dupelens.jar` and `target/dupelens-review.jar`. Direct CLI source execution remains supported:
+
+```sh
+java src/main/java/dev/dupelens/Main.java ./your-folder
 ```
 
-Checks cover identical contents, different contents with equal sizes, empty files, hard links where supported, missing directories, HTML escaping, preservation of scanned files, keeper protection, stale files, byte verification, Trash refusal, session state, and HTTP request validation. Review tests use a fake Trash that moves isolated temporary fixtures; they never call native Trash or touch user files. GitHub Actions is configured for Java 17 and 21 on Linux, macOS, and Windows.
+CI runs the Java 17/21 matrix on Linux, macOS, and Windows, checks documentation, and verifies that the CLI JAR excludes review/deletion classes. Automated review tests use temporary fixtures and fake Trash; they never move user files to native Trash.
 
-## Contributing
+## Community
 
-Small, focused contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow. Useful next steps include exclusion patterns, machine-readable output, and cancellation support for long scans.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and review expectations, [open issues](https://github.com/illusionoftalha/dupelens/issues) for contribution opportunities, and [CHANGELOG.md](CHANGELOG.md) for released and unreleased changes. Everyone participating follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-If DupeLens helps you understand your storage, a star helps others discover it.
+Maintainer procedures are in [docs/maintaining.md](docs/maintaining.md). Support is volunteer-run; response times and release dates are not guaranteed.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE), copyright DupeLens contributors.

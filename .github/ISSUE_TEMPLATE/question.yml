@@ -1,0 +1,14 @@
+name: Usage question
+description: Ask a focused question after reading the README and support guide.
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: Read SUPPORT.md first. Do not include private paths, file contents, or session URLs.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Include version, platform, command, and what you have tried when relevant.
+    validations:
+      required: true
