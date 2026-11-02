@@ -248,7 +248,7 @@ public final class Review implements AutoCloseable {
         const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
         const groups=$$('.group'), dialog=$('#confirm'), message=$('#message');
         let busy=false, pending=[];
-        function size(n){if(n<1024)return n+' B';const u=['KB','MB','GB','TB','PB','EB'];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<u.length-1);return n.toFixed(1)+' '+u[i];}
+        function size(n){if(n<1024)return n+' B';const u=['KiB','MiB','GiB','TiB','PiB','EiB'];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<u.length-1);return n.toFixed(1)+' '+u[i];}
         const selected=()=>$$('.pick:checked').map(p=>p.closest('.file-row'));
         function update(){
           groups.forEach(g=>{
